@@ -1,19 +1,22 @@
 import fs from "node:fs/promises";
-import path from "node:path";
-import { fileURLToPath } from "node:url";
 
 const rename = async () => {
-  const __filename = fileURLToPath(import.meta.url);
-  const __dirname = path.dirname(__filename);
-  const dirPath = `${__dirname}\\files`;
-  const oldFileName = `${dirPath}\\wrongFilename.txt`;
-  const newFileName = `${dirPath}\\properFilename.md`;
+  const dirPath = new URL("./files", import.meta.url);
+  const oldFileName = new URL("./files/wrongFilename.txt", import.meta.url);
+  const newFileName = new URL("./files/properFilename.md", import.meta.url);
+  const dir = await fs.readdir(dirPath);
 
   try {
-    await fs.rename(`${oldFileName}`, `${newFileName}`);
-    console.log("File renamed successfully!");
-  } catch {
-    throw new Error("FS operation failed");
+    if (
+      dir.includes("properFilename.md") ||
+      !dir.includes("wrongFilename.txt")
+    ) {
+      throw new Error("FS operation failed");
+    }
+
+    await fs.rename(oldFileName, newFileName);
+  } catch (err) {
+    console.error(err.message);
   }
 };
 
